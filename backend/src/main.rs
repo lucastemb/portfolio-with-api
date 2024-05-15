@@ -1,10 +1,15 @@
-use std::error::Error;
-use sqlx::Row;
 
+//import actix_web to make an API
+use std::error::Error;
+use actix_web::{web, App, HttpServer, HttpResponse, Responder};
+
+
+//project schema 
+#[derive(serde::Deserialize)]
 struct Project {
-    languages: Vec<&'static str>,
+    languages: Vec<String>,
     desc: String,
-    resp: Vec<&'static str>,
+    resp: Vec<String>,
     creation: String,
     thumbnail: String,
     title: String,
@@ -12,10 +17,11 @@ struct Project {
     project_number: String
 }
 
-//DATABASE
-async fn create(project: &Project, pool: &sqlx::PgPool) -> Result<(), Box<dyn Error>> {
+//post request at /projects end point (add project to db)
+#[actix_web::post("/projects")]
+async fn create(project: web::Json<Project>, pool: web::Data<sqlx::PgPool>) -> Result<HttpResponse, Box<dyn Error>> {
     let query = "INSERT INTO project (languages, descript, responsibilities, date_created, thumbnail, title, link, project_number) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)";
-
+    //build a query the project into the project table
     sqlx::query(query)
         .bind(&project.languages)
         .bind(&project.desc)
@@ -25,30 +31,32 @@ async fn create(project: &Project, pool: &sqlx::PgPool) -> Result<(), Box<dyn Er
         .bind(&project.title)
         .bind(&project.link)
         .bind(&project.project_number)
-        .execute(pool)
+        .execute(pool.get_ref())
         .await?;
-    
-        Ok(())
+
+    Ok(HttpResponse::Ok().body("Project created successfully"))
 }
-#[tokio::main]
+
+//main function 
+#[actix_web::main]
 async fn main() -> Result<(), Box<dyn Error>> {
+
+    std::env::set_var("RUST_LOG", "debug");
+    env_logger::init();
+
     let url = "postgres://postgres:postgres@localhost:5432/postgres";
     let pool = sqlx::postgres::PgPool::connect(url).await?;
 
     sqlx::migrate!("./migrations").run(&pool).await?;
 
-    let project = Project {
-        languages: vec!["Next.js", "Tailwind", "Firebase", "Express.js", "Node.js", "React"],
-        desc: "This is just a little test".to_string(),
-        resp: vec!["Worked on backend stuff"],
-        creation: "Apr. 2024".to_string(),
-        thumbnail: "NA".to_string(),
-        title: "Culinary Compass".to_string(),
-        link: "Link not available at this time".to_string(),
-        project_number: "381232103821".to_string(),
-    };
+    let port = 8080; 
+    println!("Starting server on port {}", port);
 
-    create(&project, &pool).await?;
+    HttpServer::new(move || App::new().app_data(web::Data::new(pool.clone())).service(greet).service(create))
+        .bind(("127.0.0.1", port))?
+        .workers(2)
+        .run()
+        .await?;
 
     Ok(())
 }
