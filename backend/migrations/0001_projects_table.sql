@@ -5,8 +5,5 @@ create table project (
     date_created varchar, 
     thumbnail varchar, 
     title varchar primary key not null, 
-    link text, 
-    project_number varchar not null
+    link text
 );
-
-create unique index project_number_idx on project (project_number)
