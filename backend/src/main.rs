@@ -152,11 +152,122 @@ async fn get_workexp(pool: web::Data<sqlx::PgPool>) -> Result<HttpResponse, Box<
     Ok(HttpResponse::Ok().json(workexp))
 }
 
+//delete project with given title
+#[actix_web::delete("/delete-project/{title}")]
+async fn delete_project(title: web::Path<String>, pool: web::Data<sqlx::PgPool>) -> Result<HttpResponse, Box<dyn Error>> {
+    let title = title.into_inner();
+    let result = sqlx::query("DELETE FROM project WHERE title=$1")
+        .bind(&title)
+        .execute(pool.get_ref())
+        .await;
+
+    match result {
+        Ok(_) => Ok(HttpResponse::Ok().body("Project deleted successfully")),
+        Err(e) => Err(e.into())
+    }
+
+}
+
+//delete workexp with given title
+#[actix_web::delete("/delete-work-experience/{title}")]
+async fn delete_work(title: web::Path<String>, pool: web::Data<sqlx::PgPool>) -> Result<HttpResponse, Box<dyn Error>> {
+    let title = title.into_inner();
+    let result = sqlx::query("DELETE FROM workexp WHERE company=$1")
+        .bind(&title)
+        .execute(pool.get_ref())
+        .await;
+
+    match result {
+        Ok(_) => Ok(HttpResponse::Ok().body("Work experience deleted successfully")),
+        Err(e) => Err(e.into())
+    }
+
+}
+
+//delete education with given title
+#[actix_web::delete("/delete-education/{title}")]
+async fn delete_education(title: web::Path<String>, pool: web::Data<sqlx::PgPool>) -> Result<HttpResponse, Box<dyn Error>> {
+    let title = title.into_inner();
+    let result = sqlx::query("DELETE FROM education WHERE school=$1")
+        .bind(&title)
+        .execute(pool.get_ref())
+        .await;
+
+    match result {
+        Ok(_) => Ok(HttpResponse::Ok().body("Education deleted successfully")),
+        Err(e) => Err(e.into())
+    }
+
+}
+
+//update project
+#[actix_web::patch("/update-projects/{title}")]
+async fn update_project(title: web::Path<String>, project: web::Json<Project>, pool: web::Data<sqlx::PgPool>) -> Result<HttpResponse, Box<dyn Error>>{
+    let title = title.into_inner();
+    let updated_project = project.into_inner();
+
+    let result = sqlx::query("UPDATE project SET languages = $1, descript = $2, responsibilities = $3, date_created = $4, thumbnail = $5, link = $6,  WHERE title = $7")
+    .bind(&updated_project.languages)
+    .bind(&updated_project.desc)
+    .bind(&updated_project.resp)
+    .bind(&updated_project.creation)
+    .bind(&updated_project.thumbnail)
+    .bind(&updated_project.link)
+    .bind(&title)
+    .execute(pool.get_ref())
+    .await;
+
+    match result {
+        Ok(_) => Ok(HttpResponse::Ok().body("Project updated successfully")),
+        Err(e) => Err(e.into())
+    }
+}
+
+//update education
+#[actix_web::patch("/update-education/{school}")]
+async fn update_education(school: web::Path<String>, education: web::Json<Education>, pool: web::Data<sqlx::PgPool>) -> Result<HttpResponse, Box<dyn Error>>{
+    let school_name = school.into_inner();
+    let updated_education = education.into_inner();
+
+    let result = sqlx::query("UPDATE workexp SET logo = $1, awards = $2, ecs = $3, years = $4 WHERE school = $5")
+    .bind(&updated_education.logo)
+    .bind(&updated_education.awards)
+    .bind(&updated_education.ecs)
+    .bind(&updated_education.years)
+    .bind(&school_name)
+    .execute(pool.get_ref())
+    .await;
+
+    match result {
+        Ok(_) => Ok(HttpResponse::Ok().body("Education updated successfully")),
+        Err(e) => Err(e.into())
+    }
+}
+
+//update work-experience
+#[actix_web::patch("/update-workexp/{company}")]
+async fn update_workexp(company: web::Path<String>, workxp: web::Json<WorkExp>, pool: web::Data<sqlx::PgPool>) -> Result<HttpResponse, Box<dyn Error>>{
+    let company_name = company.into_inner();
+    let updated_workexp = workxp.into_inner();
+
+    let result = sqlx::query("UPDATE workexp SET logo = $1, descript = $2, dates = $3 WHERE company = $4")
+    .bind(&updated_workexp.logo)
+    .bind(&updated_workexp.resp)
+    .bind(&updated_workexp.dates)
+    .bind(&company_name)
+    .execute(pool.get_ref())
+    .await;
+
+    match result {
+        Ok(_) => Ok(HttpResponse::Ok().body("Work experience updated successfully")),
+        Err(e) => Err(e.into())
+    }
+}
 //main function 
 #[actix_web::main]
 async fn main() -> Result<(), Box<dyn Error>> {
 
-    std::env::set_var("RUST_LOG", "debug");
+    std::env::set_var("RUST_LOG", "info,debug");
     env_logger::init();
 
     let url = "postgres://postgres:postgres@localhost:5432/postgres";
@@ -167,7 +278,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let port = 8080; 
     println!("Starting server on port {}", port);
 
-    HttpServer::new(move || App::new().app_data(web::Data::new(pool.clone())).service(add_education).service(add_project).service(add_workxp).service(get_projects).service(get_education).service(get_workexp))
+    HttpServer::new(move || App::new().app_data(web::Data::new(pool.clone())).service(add_education).service(add_project).service(add_workxp).service(get_projects).service(get_education).service(get_workexp).service(delete_project).service(delete_work).service(delete_education).service(update_workexp))
         .bind(("127.0.0.1", port))?
         .workers(2)
         .run()
