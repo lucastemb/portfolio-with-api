@@ -10,4 +10,4 @@ env_logger = "0.10.0"
 actix-web = "4.0"
 serde = { version = "1.0.197", features = ["derive"] }
 tokio = { version = "1", features = ["full"] }
-sqlx = { version = "0.7", features = [ "runtime-tokio", "tls-rustls", "postgres"] }
+sqlx = { version = "0.7.4", features = [ "runtime-tokio", "tls-rustls", "postgres"] }

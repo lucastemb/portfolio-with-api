@@ -270,7 +270,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     std::env::set_var("RUST_LOG", "info,debug");
     env_logger::init();
 
-    let url = "postgres://postgres:postgres@localhost:5432/postgres";
+    let url = "postgres://postgres:postgres@db:5432/postgres";
     let pool = sqlx::postgres::PgPool::connect(url).await?;
 
     sqlx::migrate!("./migrations").run(&pool).await?;
@@ -279,7 +279,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     println!("Starting server on port {}", port);
 
     HttpServer::new(move || App::new().app_data(web::Data::new(pool.clone())).service(add_education).service(add_project).service(add_workxp).service(get_projects).service(get_education).service(get_workexp).service(delete_project).service(delete_work).service(delete_education).service(update_workexp))
-        .bind(("127.0.0.1", port))?
+        .bind(("0.0.0.0", port))?
         .workers(2)
         .run()
         .await?;
