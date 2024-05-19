@@ -1,8 +1,10 @@
 
 //import actix_web to make an API
 use std::error::Error;
+use actix_web::http::header;
 use actix_web::{web, App, HttpServer, HttpResponse};
 use sqlx::Row;
+use actix_cors::Cors;
 
 
 //project schema 
@@ -278,7 +280,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let port = 8080; 
     println!("Starting server on port {}", port);
 
-    HttpServer::new(move || App::new().app_data(web::Data::new(pool.clone())).service(add_education).service(add_project).service(add_workxp).service(get_projects).service(get_education).service(get_workexp).service(delete_project).service(delete_work).service(delete_education).service(update_workexp))
+    HttpServer::new(move || {let cors = Cors::default().allowed_origin("http://localhost:3000").allowed_methods(vec!["GET", "POST", "DELETE", "PATCH"]).allowed_headers(vec![header::AUTHORIZATION, header::ACCEPT, header::CONTENT_TYPE]).supports_credentials().max_age(3600); App::new().wrap(cors).app_data(web::Data::new(pool.clone())).service(add_education).service(add_project).service(add_workxp).service(get_projects).service(get_education).service(get_workexp).service(delete_project).service(delete_work).service(delete_education).service(update_workexp)})
         .bind(("0.0.0.0", port))?
         .workers(2)
         .run()
