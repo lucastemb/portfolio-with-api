@@ -3,6 +3,7 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 import { GoogleLogin } from '@react-oauth/google';
 import { jwtDecode } from "jwt-decode";
 import {useEffect, useState} from "react";
+import Upload from "./uploadnew";
 
 
 export default function Admin(){
@@ -37,7 +38,7 @@ export default function Admin(){
             }}
         />)}
 
-        {loggedIn && ((!failed) ? (<p> Logged In! </p>):
+        {loggedIn && ((!failed) ? <Upload/>:
         (<p> ERROR: Not an authorized user. </p>))}
         </GoogleOAuthProvider>
         </main>
