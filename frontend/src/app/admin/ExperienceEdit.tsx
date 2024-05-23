@@ -1,6 +1,3 @@
-
-import {useEffect} from "react";
-
 interface WorkExp {
     company: string;
     resp: string[];
@@ -11,17 +8,14 @@ interface WorkExp {
   interface ExperienceProps {
     experiences: WorkExp[];
   }
-
-
-const WorkExp = ({experiences}: ExperienceProps) => {
-
+const ExperienceEdit = ({experiences}: ExperienceProps) => {
   return(
    <> 
    {experiences ? ((experiences.length > 0) ? (experiences.map((experience : WorkExp, index : number)=> (
         <div className="border-2 p-3 m-3 rounded-md" key = {index}> 
           <p className="font-semibold text-xl"> {experience.company} </p> 
           <p> {experience.dates} </p>
-          <img src={experience.logo}/>
+          <p> {experience.logo} </p>
           <p> {experience.resp.join(', ')} </p>
         </div>
       ))) : "") : "Loading..."} 
@@ -29,4 +23,4 @@ const WorkExp = ({experiences}: ExperienceProps) => {
   );
 }
 
-export default WorkExp;
+export default ExperienceEdit;

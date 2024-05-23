@@ -1,7 +1,15 @@
-import {useState} from 'react';
+import {useState, Dispatch, SetStateAction} from 'react';
 import ReactS3Client from 'react-aws-s3-typescript';
 import { s3Config } from './s3Config';
-const Upload = () =>{
+import WorkExp from '../experience';
+
+
+interface UploadProps {
+    setImage: Dispatch<SetStateAction<string>>;
+    setNewObject: Dispatch<SetStateAction<WorkExp>>
+}
+
+const Upload = (props: UploadProps) =>{
 
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [fileName, setFileName] = useState<string>("");
@@ -24,8 +32,10 @@ const Upload = () =>{
         const s3 = new ReactS3Client(s3Config);
 
         try{
-            const res = await s3.uploadFile(selectedFile,fileName);
-            console.log(res);
+            const res = await s3.uploadFile(selectedFile,fileName.substring(0, fileName.lastIndexOf('.')));
+            const link = res.location.slice(0, 56) + res.location.slice(57);
+            props.setImage(link);
+            props.setNewObject(prev=>({...prev, logo: link}));
         }
         catch(error: any) {
             console.log('An error occurred:', error);
@@ -40,14 +50,12 @@ const Upload = () =>{
     }
     return (
         <>
-        <form onSubmit={handleSubmit}>
             <div>
                 <label htmlFor="fileInput"> Upload Photo: </label>
                 <input type="file" id="fileInput" onChange={handleFileChange}/>
             </div>
             {fileName && <p>Selected file: {fileName}</p>}
-            <button type="submit"> Upload </button>
-        </form>
+            <button onClick={handleSubmit} type="submit"> Upload </button>
         </>
     );
 }
