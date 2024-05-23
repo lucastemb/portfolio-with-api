@@ -2,31 +2,9 @@
 
 import { useState, useEffect } from "react"; 
 import axios from 'axios';
-
-interface Project {
-  languages: string[];
-  desc: string;
-  resp: string[];
-  creation: string; 
-  thumbnail: string;
-  title: string;
-  link: string; 
-}
-
-interface WorkExp {
-  company: string;
-  resp: string[];
-  dates: string;
-  logo: string;
-}
-
-interface Education {
-  logo: string;
-  school: string;
-  awards: string[];
-  years: string;
-  ecs: string[];
-}
+import WorkExp from "./experience";
+import Education from "./education";
+import Project from "./project";
 
 
 
@@ -63,46 +41,10 @@ export default function Home() {
 
   return (
     <>
-    <p> {projects ? 
-    (
-      (projects.length > 0) ? 
-      (projects.map((project, index)=> (
-      <div key ={index}>
-        <p> {project.languages.join(', ')} </p> 
-        <p> {project.desc} </p> 
-        <p> {project.resp.join(', ')} </p>
-        <p> {project.creation} </p> 
-        <p> {project.thumbnail} </p> 
-        <p> {project.title} </p> 
-        <p> {project.link} </p> 
-      </div>
-      ))) 
-      : "No entries found"
-    ) : "Loading..."}</p>
-
-    <p>
-    {experience ? ((experience.length > 0) ? (experience.map((experience, index)=> (
-      <div key = {index}> 
-        <p> {(index+1)}. </p> 
-        <p> {experience.logo} </p>
-        <p> {experience.company} </p> 
-        <p> {experience.dates} </p>
-        <p> {experience.resp.join(', ')} </p>
-      </div>
-    ))) : "No entries found") : "Loading..."} 
-    </p>
-
-    <p>
-    {education ? ((education.length > 0) ? (education.map((education, index)=> (
-      <div key = {index}> 
-      <p> {education.logo} </p>
-      <p> {education.school} </p>
-      <p> {education.awards} </p>
-      <p> {education.years} </p>
-      <p> {education.ecs} </p>
-      </div>
-    ))) : "No entries found") : "Loading..."} 
-    </p>
+    <Education educations={education}/>
+    <Project projects={projects}/>
+    <WorkExp experiences={experience}/>
+    
 
 
     </>
