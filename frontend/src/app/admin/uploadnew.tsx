@@ -1,18 +1,21 @@
-import {useState, Dispatch, SetStateAction} from 'react';
+import {useState, Dispatch, SetStateAction, useImperativeHandle, forwardRef, ForwardedRef} from 'react';
 import ReactS3Client from 'react-aws-s3-typescript';
 import { s3Config } from './s3Config';
 import WorkExp from '../experience';
 
+interface UploadRef {
+    triggerUploadSubmit: () => void;
+}
 
 interface UploadProps {
     setImage: Dispatch<SetStateAction<string>>;
-    setNewObject: Dispatch<SetStateAction<WorkExp>>
+    setNewObject: Dispatch<SetStateAction<WorkExp>>;
 }
 
-const Upload = (props: UploadProps) =>{
-
+const Upload = forwardRef<UploadRef, UploadProps>((props, ref) => {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [fileName, setFileName] = useState<string>("");
+    
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files){
             setSelectedFile(event.target.files[0]);
@@ -20,15 +23,13 @@ const Upload = (props: UploadProps) =>{
         }
     };
 
-    const handleSubmit = async (event: React.FormEvent) => {
-        event.preventDefault();
+    const handleSubmit = async () => {
         if(!selectedFile){
             alert('Please select a file first!');
             return;
         }
         const formData = new FormData();
         formData.append('photo', selectedFile);
-        console.log(s3Config);
         const s3 = new ReactS3Client(s3Config);
 
         try{
@@ -48,6 +49,11 @@ const Upload = (props: UploadProps) =>{
         }
 
     }
+    
+    useImperativeHandle(ref, ()=> ({
+        triggerUploadSubmit: handleSubmit,
+    }));
+
     return (
         <>
             <div>
@@ -55,9 +61,8 @@ const Upload = (props: UploadProps) =>{
                 <input type="file" id="fileInput" onChange={handleFileChange}/>
             </div>
             {fileName && <p>Selected file: {fileName}</p>}
-            <button onClick={handleSubmit} type="submit"> Upload </button>
         </>
     );
-}
+});
 
 export default Upload;
