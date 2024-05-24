@@ -1,15 +1,15 @@
-import {useState, useEffect, useRef} from "react";
+import {useState, useEffect, useRef, SetStateAction, Dispatch} from "react";
 import axios  from "axios";
-import Experience from '../experience'
+import WorkExp from '../experience'
 import Upload from "./uploadnew";
 
 const NewExperience  = () => {
     const [workXpImage, setWorkXpImage] = useState<string>("");
-    const [newExperience, setNewExperience] = useState({
+    const [newExperience, setNewExperience] = useState<WorkExp>({
         company: '',
         dates: '',
         logo: '',
-        resp: [''],
+        resp: [],
       });  
 
 
@@ -33,7 +33,7 @@ const NewExperience  = () => {
         setNewExperience(prev => ({ ...prev, resp: newResp }));
     };
 
-    const sendWorkExperience = (workexp: Experience) => {
+    const sendWorkExperience = (workexp: WorkExp) => {
         axios.post("http://localhost:8080/work-experience", workexp).then((response)=>{
             console.log("Data posted successfully!", response.data);
         }).catch((error)=> {
@@ -88,7 +88,7 @@ const NewExperience  = () => {
 
         <div className="mb-2">
           <label className="block" htmlFor="logo">Logo</label>
-         <Upload ref={uploadRef} setImage={setWorkXpImage} setNewObject={setNewExperience}/>
+         <Upload ref={uploadRef} type={0} setImage={setWorkXpImage} setNewObject={setNewExperience}/>
         </div>
 
         <div className="mb-2">

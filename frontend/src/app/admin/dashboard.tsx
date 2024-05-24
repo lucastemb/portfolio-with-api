@@ -3,6 +3,7 @@ import axios  from "axios";
 import Project from '../project'
 import Experience from '../experience'
 import NewExperience from './addNewExperience';
+import NewEducation from './addNewEducation';
 const Dashboard = () => {
 
     const [projects, setProjects] = useState<Project[]>([]);
@@ -30,6 +31,7 @@ const Dashboard = () => {
         </div>
         
         {category === 0 ? <NewExperience/> : <div></div>}
+        {category === 1 ? <NewEducation/>: <div></div>}
         </>
     );
 }
