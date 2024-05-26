@@ -231,7 +231,7 @@ async fn update_education(school: web::Path<String>, education: web::Json<Educat
     let school_name = school.into_inner();
     let updated_education = education.into_inner();
 
-    let result = sqlx::query("UPDATE workexp SET logo = $1, awards = $2, ecs = $3, years = $4 WHERE school = $5")
+    let result = sqlx::query("UPDATE education SET logo = $1, awards = $2, ecs = $3, years = $4 WHERE school = $5")
     .bind(&updated_education.logo)
     .bind(&updated_education.awards)
     .bind(&updated_education.ecs)
@@ -251,7 +251,6 @@ async fn update_education(school: web::Path<String>, education: web::Json<Educat
 async fn update_workexp(company: web::Path<String>, workxp: web::Json<WorkExp>, pool: web::Data<sqlx::PgPool>) -> Result<HttpResponse, Box<dyn Error>>{
     let company_name = company.into_inner();
     let updated_workexp = workxp.into_inner();
-
     let result = sqlx::query("UPDATE workexp SET logo = $1, descript = $2, dates = $3 WHERE company = $4")
     .bind(&updated_workexp.logo)
     .bind(&updated_workexp.resp)
@@ -280,7 +279,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let port = 8080; 
     println!("Starting server on port {}", port);
 
-    HttpServer::new(move || {let cors = Cors::default().allowed_origin("http://localhost:3000").allowed_methods(vec!["GET", "POST", "DELETE", "PATCH"]).allowed_headers(vec![header::AUTHORIZATION, header::ACCEPT, header::CONTENT_TYPE]).supports_credentials().max_age(3600); App::new().wrap(cors).app_data(web::Data::new(pool.clone())).service(add_education).service(add_project).service(add_workxp).service(get_projects).service(get_education).service(get_workexp).service(delete_project).service(delete_work).service(delete_education).service(update_workexp)})
+    HttpServer::new(move || {let cors = Cors::default().allowed_origin("http://localhost:3000").allowed_methods(vec!["GET", "POST", "DELETE", "PATCH"]).allowed_headers(vec![header::AUTHORIZATION, header::ACCEPT, header::CONTENT_TYPE]).supports_credentials().max_age(3600); App::new().wrap(cors).app_data(web::Data::new(pool.clone())).service(add_education).service(add_project).service(add_workxp).service(get_projects).service(get_education).service(get_workexp).service(delete_project).service(delete_work).service(delete_education).service(update_workexp).service(update_education).service(update_project)})
         .bind(("0.0.0.0", port))?
         .workers(2)
         .run()

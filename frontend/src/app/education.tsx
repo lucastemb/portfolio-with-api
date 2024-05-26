@@ -15,7 +15,7 @@ const Education = ({educations}: EducationProps) => {
    {educations ? ((educations.length > 0) ? (educations.map((education : Education, index : number)=> (
         <div  className="border-2 p-3 m-3 rounded-md" key = {index}> 
           <p className="font-semibold text-xl"> {education.school} </p> 
-          <p> {education.logo} </p>
+          <img src={education.logo}/>
           <p> {education.years} </p>
           <p> {education.ecs.join(', ')} </p>
           <p> {education.awards.join(', ')} </p>

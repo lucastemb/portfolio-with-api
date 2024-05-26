@@ -17,6 +17,7 @@ export default function Home() {
     //get projects
     axios.get('http://localhost:8080/get-projects')
       .then(response => {
+        console.log(response.data);
         setProjects(response.data);
       })
       .catch(error=> console.error("There was an error fetching the data.", error))
