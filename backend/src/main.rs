@@ -208,7 +208,7 @@ async fn update_project(title: web::Path<String>, project: web::Json<Project>, p
     let title = title.into_inner();
     let updated_project = project.into_inner();
 
-    let result = sqlx::query("UPDATE project SET languages = $1, descript = $2, responsibilities = $3, date_created = $4, thumbnail = $5, link = $6,  WHERE title = $7")
+    let result = sqlx::query("UPDATE project SET languages = $1, descript = $2, responsibilities = $3, date_created = $4, thumbnail = $5, link = $6 WHERE title = $7")
     .bind(&updated_project.languages)
     .bind(&updated_project.desc)
     .bind(&updated_project.resp)
