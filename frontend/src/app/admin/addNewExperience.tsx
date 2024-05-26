@@ -1,17 +1,43 @@
 import {useState, useEffect, useRef, SetStateAction, Dispatch} from "react";
-import axios  from "axios";
+import axios, {AxiosResponse} from "axios";
 import WorkExp from '../experience'
 import Upload from "./uploadnew";
 
-const NewExperience  = () => {
+interface NewExperienceProps {
+    editExperience?: WorkExp;
+    edit: boolean; 
+}
+
+const NewExperience  = ({edit, editExperience}: NewExperienceProps) => {
     const [workXpImage, setWorkXpImage] = useState<string>("");
+    const [changeImage, setChangeImage] = useState<boolean>(false);
     const [newExperience, setNewExperience] = useState<WorkExp>({
-        company: '',
-        dates: '',
-        logo: '',
-        resp: [],
+        company: editExperience?.company || '',
+        dates: editExperience?.dates ||'',
+        logo: editExperience?.logo || '',
+        resp: editExperience?.resp || [],
       });  
 
+    
+    const editImage = ():void => {
+        setChangeImage(!changeImage);
+    }
+
+    const handleEdit = (newExperience: WorkExp): void => {
+        axios.patch(`http://localhost:8080/update-workexp/${encodeURI(newExperience.company)}`, newExperience).then((response: AxiosResponse)=> {
+            console.log("Entry edited successfully", response)
+        }).catch((error: Error)=> {
+            console.error("Error editing entry!", error);
+        })
+    }
+
+    const deleteEntry = (): void => {
+        axios.delete(`http://localhost:8080/delete-work-experience/${encodeURI(newExperience.company)}`).then((response)=> {
+            console.log("Entry deleted succesfully", response);
+        }).catch((error: Error)=>{
+            console.error("Error deleting entry.", error);
+        })
+    }
 
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, field: string) => {
         setNewExperience({ ...newExperience, [field]: event.target.value });
@@ -45,19 +71,30 @@ const NewExperience  = () => {
      useEffect(()=>{
         //should only take effect if workXpImage is not blank if not it will add a new submission every time the page is refreshed
         if(workXpImage !== ""){
-            sendWorkExperience(newExperience);
+            if(edit){
+                handleEdit(newExperience);
+            }
+            else{
+                sendWorkExperience(newExperience);
+            }
+            
         }
     }, [workXpImage])
     
     const uploadRef = useRef<any>(null);
 
     const handleSubmit = async () => {
-        if(uploadRef.current){
-            try{
-                await uploadRef.current.triggerUploadSubmit();
-            } catch(error) {
-                console.error("There was an error uploading the experience", error);
+        if((changeImage && edit) || !edit){
+            if(uploadRef.current){
+                try{
+                    await uploadRef.current.triggerUploadSubmit();
+                } catch(error) {
+                    console.error("There was an error uploading the experience", error);
+                }
             }
+        }
+        else {
+            handleEdit(newExperience);
         }
     }
 
@@ -69,6 +106,7 @@ const NewExperience  = () => {
           <input
             id="company"
             type="text"
+            readOnly={edit}
             value={newExperience.company}
             onChange={(e) => handleInputChange(e, 'company')}
             className="border rounded-md p-2 w-full"
@@ -88,7 +126,11 @@ const NewExperience  = () => {
 
         <div className="mb-2">
           <label className="block" htmlFor="logo">Logo</label>
-         <Upload ref={uploadRef} type={0} setImage={setWorkXpImage} setNewObject={setNewExperience}/>
+           {edit ? 
+          
+          (!changeImage ? (<> <img src={editExperience?.logo}/> <button onClick={editImage}> Change Image </button> </>) 
+          : <><Upload ref={uploadRef} setImage={setWorkXpImage} setNewObject={setNewExperience}/>  <button onClick={editImage}> Cancel (x) </button></>)
+          : <Upload ref={uploadRef} setImage={setWorkXpImage} setNewObject={setNewExperience}/>}
         </div>
 
         <div className="mb-2">
@@ -117,6 +159,12 @@ const NewExperience  = () => {
           
         </div>
       </form>
+      {edit ? (
+        <button type="button" onClick={deleteEntry}> 
+            Delete (x)
+        </button>
+      ) : 
+      <div></div> }
       <button type="button" onClick={handleSubmit}>
           Submit
       </button>

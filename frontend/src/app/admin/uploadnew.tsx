@@ -45,7 +45,9 @@ const Upload = forwardRef<UploadRef, UploadProps>((props, ref) => {
                         if('logo' in prev) {
                             return {...prev, logo: link};
                         }
-                        return prev;
+                        else {
+                            return {...prev, thumbnail: link}
+                        }
                     }
                 );
         }

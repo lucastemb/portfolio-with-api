@@ -3,9 +3,9 @@ import axios  from "axios";
 import Project from '../project';
 import Upload from "./uploadnew";
 
-const NewEducation  = () => {
-    const [eduImage, setEduImage] = useState<string>("");
-    const [newEducation, setNewEducation] = useState<Project>({
+const NewProject  = () => {
+    const [thumbnail, setThumbnail] = useState<string>("");
+    const [newProject, setNewProject] = useState<Project>({
         languages: [],
         desc: '',
         resp: [],
@@ -18,45 +18,43 @@ const NewEducation  = () => {
 
 
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, field: string) => {
-        setNewEducation({ ...newEducation, [field]: event.target.value });
+        setNewProject({ ...newProject, [field]: event.target.value });
     };
 
-    const addAward = () => {
-        setNewEducation(prev => ({...prev, awards: [...prev.awards, '']}))
-        console.log(newEducation);
+    const addLanguage = () => {
+        setNewProject(prev => ({...prev, languages: [...prev.languages, '']}))
     }
 
-    const deleteAward = (index: number) => {
-        setNewEducation(prev=> ({...prev, awards:[
-            ...prev.awards.filter((_, i)=> i !== index)
+    const deleteLanguage = (index: number) => {
+        setNewProject(prev=> ({...prev, languages:[
+            ...prev.languages.filter((_, i)=> i !== index)
         ]}))
     }
 
-    const handleAwardChange = (index: number, event: React.ChangeEvent<HTMLInputElement>) => {
-        const newResp = [...newEducation.awards];
+    const handleLanguageChange = (index: number, event: React.ChangeEvent<HTMLInputElement>) => {
+        const newResp = [...newProject.languages];
         newResp[index] = event.target.value;
-        setNewEducation(prev => ({ ...prev, awards: newResp }));
+        setNewProject(prev => ({ ...prev, languages: newResp }));
     };
 
-    const addEC = () => {
-        setNewEducation(prev => ({...prev, ecs: [...prev.ecs, '']}));
-        console.log(newEducation);
+    const addResp = () => {
+        setNewProject(prev => ({...prev, resp: [...prev.resp, '']}))
     }
 
-    const deleteEC = (index: number) => {
-        setNewEducation(prev=> ({...prev, ecs:[
-            ...prev.ecs.filter((_, i)=> i !== index)
+    const deleteResp = (index: number) => {
+        setNewProject(prev=> ({...prev, resp:[
+            ...prev.resp.filter((_, i)=> i !== index)
         ]}))
     }
 
-    const handleECChange = (index: number, event: React.ChangeEvent<HTMLInputElement>) => {
-        const newEcs = [...newEducation.ecs];
-        newEcs[index] = event.target.value;
-        setNewEducation(prev => ({ ...prev, ecs: newEcs }));
+    const handleRespChange = (index: number, event: React.ChangeEvent<HTMLInputElement>) => {
+        const newResp = [...newProject.resp];
+        newResp[index] = event.target.value;
+        setNewProject(prev => ({ ...prev, resp: newResp }));
     };
 
-    const sendEducation = (education: Education) => {
-        axios.post("http://localhost:8080/education", education).then((response)=>{
+    const sendProject = (project: Project) => {
+        axios.post("http://localhost:8080/projects", project).then((response)=>{
             console.log("Data posted successfully!", response.data);
         }).catch((error)=> {
             console.error("There was an error sending the data", error);
@@ -66,14 +64,11 @@ const NewEducation  = () => {
      //EducationerienceImages (logos) can only be changed upon submission; thus, when workXpImages change send an image.
      useEffect(()=>{
         //should only take effect if workXpImage is not blank if not it will add a new submission every time the page is refreshed
-        if(eduImage !== ""){
-            sendEducation(newEducation);
+        if(thumbnail !== ""){
+            console.log(newProject);
+            sendProject(newProject);
         }
-    }, [eduImage])
-
-    useEffect(() => {
-        console.log(newEducation);
-    }, [newEducation]);
+    }, [thumbnail])
     
     const uploadRef = useRef<any>(null);
 
@@ -91,51 +86,71 @@ const NewEducation  = () => {
         <>
         <form>
         <div className="mb-2">
-          <label className="block" htmlFor="school">School</label>
+          <label className="block" htmlFor="title">Title</label>
           <input
-            id="school"
+            id="title"
             type="text"
-            value={newEducation.school}
-            onChange={(e) => handleInputChange(e, 'school')}
+            value={newProject.title}
+            onChange={(e) => handleInputChange(e, 'title')}
+            className="border rounded-md p-2 w-full"
+          />
+        </div>
+        <div className="mb-2">
+          <label className="block" htmlFor="desc">Description</label>
+          <input
+            id="desc"
+            type="text"
+            value={newProject.desc}
+            onChange={(e) => handleInputChange(e, 'desc')}
+            className="border rounded-md p-2 w-full"
+          />
+        </div>
+        <div className="mb-2">
+          <label className="block" htmlFor="link">Link</label>
+          <input
+            id="link"
+            type="text"
+            value={newProject.link}
+            onChange={(e) => handleInputChange(e, 'link')}
             className="border rounded-md p-2 w-full"
           />
         </div>
 
         <div className="mb-2">
-          <label className="block" htmlFor="years">Years</label>
+          <label className="block" htmlFor="creation">Date Created</label>
           <input
-            id="years"
+            id="creation"
             type="text"
-            value={newEducation.years}
-            onChange={(e) => handleInputChange(e, 'years')}
+            value={newProject.creation}
+            onChange={(e) => handleInputChange(e, 'creation')}
             className="border rounded-md p-2 w-full"
           />
         </div>
 
         <div className="mb-2">
-          <label className="block" htmlFor="logo">Logo</label>
-         <Upload ref={uploadRef} type={0} setImage={setEduImage} setNewObject={setNewEducation}/>
+          <label className="block" htmlFor="thumbnail">Thumbnail</label>
+         <Upload ref={uploadRef} type={0} setImage={setThumbnail} setNewObject={setNewProject}/>
         </div>
 
         <div className="mb-2">
-          <label className="block" htmlFor="ecs">
-          ECS:
-          {newEducation.ecs.map((ec, index) => (
+          <label className="block" htmlFor="languages">
+          Languages:
+          {newProject.languages.map((language, index) => (
               <div key={index} className="flex items-center mb-2">
               <input
                 type="text"
-                value={ec}
-                onChange={(event) => handleECChange(index, event)}
+                value={language}
+                onChange={(event) => handleLanguageChange(index, event)}
                 className="p-2 border flex-grow"
               />
-              <button type="button" onClick={()=> deleteEC(index)}>
+              <button type="button" onClick={()=> deleteLanguage(index)}>
                   Delete
               </button>
               </div>
               
           ))}
           <div>
-          <button  type="button" onClick={()=> addEC()}>
+          <button  type="button" onClick={()=> addLanguage()}>
               Add
           </button>
           </div>
@@ -145,23 +160,23 @@ const NewEducation  = () => {
 
         <div className="mb-2">
           <label className="block" htmlFor="awards">
-          Awards:
-          {newEducation.awards.map((award, index) => (
+          Responsibilities:
+          {newProject.resp.map((resp, index) => (
               <div key={index} className="flex items-center mb-2">
               <input
                 type="text"
-                value={award}
-                onChange={(event) => handleAwardChange(index, event)}
+                value={resp}
+                onChange={(event) => handleRespChange(index, event)}
                 className="p-2 border flex-grow"
               />
-              <button type="button" onClick={()=> deleteAward(index)}>
+              <button type="button" onClick={()=> deleteResp(index)}>
                   Delete
               </button>
               </div>
               
           ))}
           <div>
-          <button  type="button" onClick={()=> addAward()}>
+          <button  type="button" onClick={()=> addResp()}>
               Add
           </button>
           </div>
@@ -176,4 +191,4 @@ const NewEducation  = () => {
     );
 }
 
-export default NewEducation;
+export default NewProject;

@@ -18,7 +18,7 @@ const Project = ({projects}: ProjectProps) => {
    {projects ? ((projects.length > 0) ? (projects.map((project : Project, index : number)=> (
         <div className="border-2 p-3 m-3 rounded-md" key = {index}> 
           <p className="font-semibold text-xl"> {project.title} </p> 
-          <p> {project.thumbnail} </p>
+          <img src={project.thumbnail}/>
           <p> {project.creation} </p>
           <p> {project.desc} </p>
           <p> {project.resp.join(', ')} </p>
