@@ -1,8 +1,13 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Space_Grotesk } from "next/font/google";
 import "./globals.css";
+import Head from "next/head";
 
-const inter = Inter({ subsets: ["latin"] });
+
+const spaceGrotesk = Space_Grotesk({ 
+  subsets: ["latin"],
+  variable: "--font-grotesk"
+})
 
 export const metadata: Metadata = {
   title: "Lucas Tembras",
@@ -16,7 +21,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <Head>
+        <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/gh/dheereshagrwal/colored-icons@1.7.5/src/app/ci.min.css"
+  />
+      </Head>
+      <body className={`${spaceGrotesk.variable} font-sans`}>
         {children}
       </body>
     </html>

@@ -41,13 +41,18 @@ export default function Home() {
   }, [experience])
 
   return (
-    <>
+    <div className="mx-auto max-w-4xl">
+    <div className="flex flex-col">
+    <h1 className="font-bold text-3xl ml-5"> Education </h1> 
     <Education educations={education}/>
+    <h1 className="font-bold text-3xl ml-5"> Projects</h1> 
     <Project projects={projects}/>
+    <h1 className="font-bold text-3xl ml-5"> Work Experience </h1> 
     <WorkExp experiences={experience}/>
+    </div>
     
 
 
-    </>
+    </div>
   );
 }

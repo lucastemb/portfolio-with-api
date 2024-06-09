@@ -23,6 +23,10 @@ const Dashboard = () => {
         setEducation(response.data)
         })
         .catch(error=>console.error("There was an error fetching the data.", error))
+
+        axios.get("http://localhost:8080/get-projects").then(response=> {
+            setProjects(response.data)
+        })
     },
     [category])
 
@@ -48,7 +52,9 @@ const Dashboard = () => {
             <NewEducation edit={true} editEducation={e}/>
             )))} 
             </>: <div></div>}
-        {category === 2 ? <NewProject/>: <div></div>}
+        {category === 2 ? <> <NewProject edit={false}/> {projects.map((p)=> (
+            <NewProject edit={true} editProject={p}/>
+        ))}</>: <div></div>}
         </>
     );
 }

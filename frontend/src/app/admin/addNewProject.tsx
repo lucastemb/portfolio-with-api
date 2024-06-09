@@ -1,21 +1,46 @@
 import {useState, useEffect, useRef, SetStateAction, Dispatch} from "react";
-import axios  from "axios";
+import axios, {AxiosResponse} from "axios";
 import Project from '../project';
 import Upload from "./uploadnew";
 
-const NewProject  = () => {
+interface NewProjectProps {
+  editProject?: Project;
+  edit: boolean;
+}
+const NewProject  = ({editProject, edit}: NewProjectProps) => {
     const [thumbnail, setThumbnail] = useState<string>("");
+    const [changeImage, setChangeImage] = useState<boolean>(false);
     const [newProject, setNewProject] = useState<Project>({
-        languages: [],
-        desc: '',
-        resp: [],
-        creation: '',
-        thumbnail: '',
-        title: '',
-        link: '',
+        languages: editProject?.languages || [],
+        desc: editProject?.desc || '',
+        resp: editProject?.resp || [],
+        creation: editProject?.creation || '',
+        thumbnail: editProject?.thumbnail || '',
+        title: editProject?.title || '',
+        link: editProject?.link || '',
       });  
 
+    const editImage = (): void => {
+      setChangeImage(!changeImage);
+    }
+    useEffect(()=> {
+      console.log(newProject);
+    }, [newProject])
+    const handleEdit = (newProject: Project): void => {
+      axios.patch(`http://localhost:8080/update-projects/${encodeURI(newProject.title)}`, newProject).then((response: AxiosResponse)=> {
+          console.log("Entry edited successfully", response)
+      }).catch((error: Error)=> {
+          console.error("Error editing entry!", error);
+      })
+  }
 
+    const deleteEntry = (): void => {
+        axios.delete(`http://localhost:8080/delete-project/${encodeURI(newProject.title)}`).then((response)=> {
+            console.log("Entry deleted succesfully", response);
+        }).catch((error: Error)=>{
+            console.error("Error deleting entry.", error);
+        })
+    }
 
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, field: string) => {
         setNewProject({ ...newProject, [field]: event.target.value });
@@ -65,14 +90,20 @@ const NewProject  = () => {
      useEffect(()=>{
         //should only take effect if workXpImage is not blank if not it will add a new submission every time the page is refreshed
         if(thumbnail !== ""){
-            console.log(newProject);
-            sendProject(newProject);
+            if(!edit){
+              sendProject(newProject);
+            }
+            else{
+              handleEdit(newProject);
+            }
+            
         }
     }, [thumbnail])
     
     const uploadRef = useRef<any>(null);
 
     const handleSubmit = async () => {
+      if((changeImage && edit) || !edit){
         if(uploadRef.current){
             try{
                 await uploadRef.current.triggerUploadSubmit();
@@ -80,6 +111,10 @@ const NewProject  = () => {
                 console.error("There was an error uploading the experience", error);
             }
         }
+      }
+      else {
+        handleEdit(newProject);
+      }
     }
 
     return(
@@ -91,6 +126,7 @@ const NewProject  = () => {
             id="title"
             type="text"
             value={newProject.title}
+            readOnly={edit}
             onChange={(e) => handleInputChange(e, 'title')}
             className="border rounded-md p-2 w-full"
           />
@@ -129,7 +165,11 @@ const NewProject  = () => {
 
         <div className="mb-2">
           <label className="block" htmlFor="thumbnail">Thumbnail</label>
-         <Upload ref={uploadRef} type={0} setImage={setThumbnail} setNewObject={setNewProject}/>
+          {edit ? 
+          
+          (!changeImage ? (<> <img src={editProject?.thumbnail}/> <button onClick={editImage}> Change Image </button> </>) 
+          : <><Upload ref={uploadRef} setImage={setThumbnail} setNewObject={setNewProject}/>  <button onClick={editImage}> Cancel (x) </button></>)
+          : <Upload ref={uploadRef} setImage={setThumbnail} setNewObject={setNewProject}/>}
         </div>
 
         <div className="mb-2">
@@ -187,6 +227,12 @@ const NewProject  = () => {
       <button type="button" onClick={handleSubmit}>
           Submit
       </button>
+      {edit ? (
+        <button type="button" onClick={deleteEntry}> 
+            Delete (x)
+        </button>
+      ) : 
+      <div></div> }
       </>
     );
 }
